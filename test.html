@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Year Countdown</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #0f0f23, #060612);
+            overflow: hidden;
+            font-family: 'Courier New', Courier, monospace;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        #countdown, .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        #countdown {
+            font-size: 4rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 10px white, 0 0 20px white;
+        }
+
+        .container {
+            display: none;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc;
+            }
+            50% {
+                text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 60px #ff00ff;
+            }
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="countdown">00:00:00</div>
+    <div class="container">
+        <h1>✨ Happy New Year 2025 ✨</h1>
+    </div>
+    <canvas id="fireworks"></canvas>
+    <audio id="newYearSong" src="https://www.fesliyanstudios.com/play-mp3/387"></audio>
+    <p style="font-size: 14px;">created by Raj Sharma (CEO OF TRMX & RLMe)</p>
+    <script>
+        const countdown = document.getElementById("countdown");
+        const container = document.querySelector(".container");
+        const canvas = document.getElementById("fireworks");
+        const ctx = canvas.getContext("2d");
+        const song = document.getElementById("newYearSong");
+
+        // Set the countdown target
+        const targetDate = new Date(new Date().getFullYear() + 1, 0, 1, 0, 0, 0).getTime();
+
+        // Countdown timer
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance <= 0) {
+                clearInterval(timer);
+                startCelebration();
+                return;
+            }
+
+            const hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+            const minutes = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+            const seconds = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+
+            countdown.textContent = `${hours}:${minutes}:${seconds}`;
+        }, 1000);
+
+        // Start the celebration
+        function startCelebration() {
+            countdown.style.display = "none";
+            container.style.display = "block";
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            song.play();
+
+            createFireworks();
+            animate();
+        }
+
+        // Fireworks animation
+        const particles = [];
+        const gravity = 0.04;
+
+        class Particle {
+            constructor(x, y, color, speed, angle) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.speed = speed;
+                this.angle = angle;
+                this.radius = Math.random() * 3 + 2;
+                this.alpha = 1;
+            }
+
+            update() {
+                this.x += Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed + gravity;
+                this.alpha -= 0.02;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createFireworks() {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height / 2;
+            const colors = ["#00ffcc", "#ff00ff", "#00ffff", "#ffdd00"];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 80; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 4 + 2;
+                particles.push(new Particle(x, y, color, speed, angle));
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = "rgba(15, 15, 35, 0.2)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                if (particle.alpha <= 0) {
+                    particles.splice(index, 1);
+                } else {
+                    particle.update();
+                    particle.draw();
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener("resize", () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
